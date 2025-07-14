@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OneDev - CI/CD Automation Interface</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Authentication Card -->
+        <div class="card auth-card" id="auth-card">
+            <div class="logo">
+                <svg viewBox="0 0 60 60" fill="currentColor">
+                    <circle cx="20" cy="20" r="6" fill="currentColor"/>
+                    <circle cx="40" cy="20" r="6" fill="currentColor"/>
+                    <circle cx="30" cy="40" r="6" fill="currentColor"/>
+                    <path d="M26 20L34 20" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M24 26L26 34" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M36 26L34 34" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                </svg>
+            </div>
+            
+            <h1 class="title">OneDev</h1>
+            <p class="subtitle">CI/CD Automation Interface</p>
+            <p class="company">OnePoint Enterprise</p>
+            
+            <div class="info-banner">
+                <p>
+                    <span class="info-icon">i</span>
+                    Use your GitLab Personal Access Token
+                </p>
+            </div>
+            
+            <div class="form-section">
+                <div class="form-label">
+                    <span class="key-icon">K</span>
+                    GitLab Personal Access Token
+                </div>
+                <input type="password" id="gitlab-token" class="token-input" placeholder="glpat-xxxxxxxxxxxxxxxxxxxx">
+                <div class="token-info">
+                    Personal Access Token from GitLab<br>
+                    Required scopes: api, read_user, read_repository, write_repository
+                </div>
+            </div>
+            
+            <button class="connect-btn" id="auth-btn">
+                Connect to GitLab
+            </button>
+            
+            <div id="auth-status" class="status hidden"></div>
+        </div>
+
+        <!-- STEP 1: PROJECT SETUP -->
+        <div class="card content-card" id="project-creation-section">
+            <h2 class="section-title">
+                <span class="section-icon">1</span>
+                Project Setup
+            </h2>
+            
+            <div class="form-group">
+                <label for="project-name">Project Name:</label>
+                <input type="text" id="project-name" placeholder="my-awesome-project">
+            </div>
+
+            <div class="form-group">
+                <label for="branch-name">Default Branch:</label>
+                <select id="branch-name">
+                    <option value="main">main</option>
+                    <option value="master">master</option>
+                    <option value="develop">develop</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Development Language:</label>
+                <div class="language-grid">
+                    <div class="language-card" data-lang="python">
+                        <h4>Python</h4>
+                    </div>
+                    <div class="language-card disabled" data-lang="javascript">
+                        <h4>JavaScript</h4>
+                    </div>
+                    <div class="language-card disabled" data-lang="nodejs">
+                        <h4>Node.js</h4>
+                    </div>
+                    <div class="language-card disabled" data-lang="java">
+                        <h4>Java</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Python Version -->
+            <div class="version-select" id="python-version">
+                <label for="python-ver">Python Version:</label>
+                <select id="python-ver">
+                    <option value="3.11">Python 3.11</option>
+                    <option value="3.10">Python 3.10</option>
+                    <option value="3.9">Python 3.9</option>
+                    <option value="3.12">Python 3.12</option>
+                </select>
+            </div>
+
+            <!-- Python Framework -->
+            <div id="framework-section" style="display: none;">
+                <div class="form-group">
+                    <label>Python Framework (Optional):</label>
+                    <div class="language-grid">
+                        <div class="language-card" data-framework="flask">
+                            <h4>Flask</h4>
+                        </div>
+                        <div class="language-card" data-framework="django">
+                            <h4>Django</h4>
+                        </div>
+                        <div class="language-card" data-framework="fastapi">
+                            <h4>FastAPI</h4>
+                        </div>
+                        <div class="language-card" data-framework="none">
+                            <h4>No Framework</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-actions">
+                <button class="btn btn-primary" id="create-project-btn" disabled>
+                    Create Project
+                </button>
+            </div>
+                
+            <div id="project-info" class="project-info hidden">
+                <h4 style="color: #065f46; margin-bottom: 16px;">Project created successfully!</h4>
+                
+                <div style="margin-bottom: 20px;">
+                    <a href="#" id="gitlab-project-link" class="gitlab-link" target="_blank">
+                        View Project on GitLab
+                    </a>
+                </div>
+                
+                <div class="git-clone-section">
+                    <h4>Git Clone Command:</h4>
+                    <div class="clone-command" id="clone-command">
+                        git clone https://gitlab.com/onedevtechops/my-project.git
+                    </div>
+                </div>
+
+                <div class="onedev-note">
+                    <h5><strong>onedevtechops Integration</strong></h5>
+                    <p>Your project has been created in the onedevtechops group (ID: 110952958) for professional CI/CD management and team collaboration.</p>
+                </div>
+
+                <div class="realistic-note">
+                    <h5><strong>Next Steps</strong></h5>
+                    <p>1. Clone your repository locally<br>2. Add your project code<br>3. Generate .gitlab-ci.yml file below<br>4. Push your code to trigger the pipeline</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 2: CI/CD PIPELINE CONFIGURATION -->
+        <div class="card content-card" id="pipeline-section">
+            <h2 class="section-title">
+                <span class="section-icon">2</span>
+                CI/CD Pipeline Configuration
+            </h2>
+            
+            <div class="tools-grid">
+                <div class="tool-card">
+                    <h4>Unit Tests</h4>
+                    <label class="checkbox-item">
+                        <input type="checkbox" value="unittest" checked> unittest
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" value="pytest" checked> pytest
+                    </label>
+                </div>
+
+                <div class="tool-card">
+                    <h4>End-to-End Tests</h4>
+                    <label class="checkbox-item">
+                        <input type="checkbox" value="selenium"> Selenium
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" value="cypress"> Cypress
+                    </label>
+                </div>
+
+                <div class="tool-card">
+                    <h4>Code Quality</h4>
+                    <label class="checkbox-item">
+                        <input type="checkbox" value="pylint" checked> pylint
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" value="flake8" checked> Flake8
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" value="mypy"> MyPy
+                    </label>
+                </div>
+
+                <div class="tool-card">
+                    <h4>Security</h4>
+                    <label class="checkbox-item">
+                        <input type="checkbox" value="bandit" checked> Bandit
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" value="safety" checked> Safety
+                    </label>
+                </div>
+
+                <!-- BASIC DEPLOY OPTIONS -->
+                <div class="tool-card">
+                    <h4>Deploy</h4>
+                    <label class="checkbox-item">
+                        <input type="checkbox" value="docker" checked> Docker Build
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" value="ssh-deploy"> SSH Deploy
+                    </label>
+                </div>
+            </div>
+
+            <!-- DEPLOY SECTIONS UNDER THE MAIN GRID -->
+            <div class="deploy-sections">
+                <!-- AWS SERVICES SECTION -->
+                <div class="deploy-section">
+                    <h4>AWS Services</h4>
+                    
+                    <label class="checkbox-item">
+                        <input type="checkbox" value="aws-ec2" id="aws-ec2-checkbox"> 
+                        <div>
+                            <strong>EC2 Instance</strong>
+                            <div class="service-description">Deploy to Amazon EC2 instances</div>
+                        </div>
+                    </label>
+                    
+                    <label class="checkbox-item">
+                        <input type="checkbox" value="aws-beanstalk" id="aws-beanstalk-checkbox"> 
+                        <div>
+                            <strong>Elastic Beanstalk</strong>
+                            <div class="service-description">Deploy to AWS Elastic Beanstalk</div>
+                        </div>
+                    </label>
+                    
+                    <label class="checkbox-item">
+                        <input type="checkbox" value="aws-ecs" id="aws-ecs-checkbox"> 
+                        <div>
+                            <strong>ECS (Containers)</strong>
+                            <div class="service-description">Deploy to Amazon ECS</div>
+                        </div>
+                    </label>
+                    
+                    <label class="checkbox-item">
+                        <input type="checkbox" value="aws-lambda" id="aws-lambda-checkbox"> 
+                        <div>
+                            <strong>Lambda Functions</strong>
+                            <div class="service-description">Deploy serverless functions</div>
+                        </div>
+                    </label>
+                    
+                    <!-- AWS Configuration Note -->
+                    <div id="aws-config-note" style="display: none;">
+                        <h6>⚙️ AWS Configuration Required</h6>
+                        <p>
+                            Add these variables to your GitLab CI/CD Variables:<br>
+                            • <code>AWS_ACCESS_KEY_ID</code><br>
+                            • <code>AWS_SECRET_ACCESS_KEY</code><br>
+                            • <code>AWS_DEFAULT_REGION</code><br>
+                            • <code>AWS_APPLICATION_NAME</code> (for Beanstalk)<br>
+                            • <code>AWS_ENVIRONMENT_NAME</code> (for Beanstalk)
+                        </p>
+                    </div>
+                </div>
+
+                <!-- CUSTOM DEPLOYMENT SECTION -->
+                <div class="deploy-section">
+                    <h4>Custom Deployment</h4>
+                    
+                    <label class="checkbox-item">
+                        <input type="checkbox" value="custom-deploy" id="custom-deploy-checkbox"> 
+                        <div>
+                            <strong>Custom Deployment</strong>
+                            <div class="service-description">Specify your own deployment method</div>
+                        </div>
+                    </label>
+                    
+                    <!-- Custom deployment input field -->
+                    <div id="custom-deploy-input" style="display: none;">
+                        <label>
+                            Describe your deployment method:
+                        </label>
+                        <textarea 
+                            id="custom-deploy-description" 
+                            placeholder="e.g., Deploy to Kubernetes cluster, Upload to FTP server, Deploy to custom cloud provider..."
+                        ></textarea>
+                        <div class="input-help">
+                            This will be added as a comment in your pipeline configuration
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="s3-integration-note">
+                <h5>S3 Logs Integration</h5>
+                <p>This pipeline will automatically upload logs from each stage to S3 (onedev-pipeline-logs bucket) for AI analysis. Make sure to configure AWS credentials in your GitLab CI/CD variables: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_DEFAULT_REGION.</p>
+            </div>
+
+            <div class="realistic-note">
+                <h5><strong>Professional Pipeline Workflow</strong></h5>
+                <p>1. Generate .gitlab-ci.yml file with selected tools and S3 integration<br>2. Upload your code to the repository<br>3. Trigger pipeline manually when ready<br>4. Monitor test results and S3 logs upload<br>5. Run AI analysis on stored logs</p>
+            </div>
+
+            <div class="pipeline-actions">
+                <button class="btn btn-success" id="generate-yml-btn" disabled>
+                    Generate .gitlab-ci.yml
+                </button>
+                <button class="btn btn-primary" id="trigger-pipeline-btn" disabled>
+                    Trigger Pipeline
+                </button>
+            </div>
+
+            <div id="files-generated" class="files-generated hidden">
+                <h4>Pipeline Configuration Generated!</h4>
+                <div class="file-item">
+                    <span class="file-icon">F</span>
+                    <strong>.gitlab-ci.yml</strong> - Complete CI/CD pipeline with enhanced AWS deployment options and S3 logs integration
+                </div>
+                <div class="file-item">
+                    <span class="file-icon">F</span>
+                    <strong>README.md</strong> - Professional project documentation and setup guide with AWS deployment information
+                </div>
+                
+                <div style="background: #ecfdf5; border: 1px solid #10b981; border-radius: 8px; padding: 16px; margin: 16px 0;">
+                    <h5 style="color: #065f46; margin-bottom: 12px;">Pipeline Features</h5>
+                    <p style="color: #065f46; margin: 0; font-size: 14px; line-height: 1.5;">
+                        • Automatic tests on every commit<br>
+                        • Enhanced AWS deployment options (EC2, Beanstalk, ECS, Lambda)<br>
+                        • Custom deployment methods support<br>
+                        • S3 logs upload after each stage<br>
+                        • Manual deployment for controlled releases<br>
+                        • AI analysis ready with Bedrock integration<br>
+                        • Professional error handling and reporting
+                    </p>
+                </div>
+                
+                <div id="selected-tools-display" style="margin-top: 16px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 4px solid #3b82f6;">
+                    <strong style="color: #1e40af;">Pipeline includes:</strong>
+                    <div id="tools-list" style="margin-top: 8px; font-size: 14px; color: #374151;"></div>
+                </div>
+            </div>
+
+            <div id="pipeline-status" class="status hidden"></div>
+        </div>
+
+        <!-- STEP 3: AI ANALYSIS -->
+        <div class="card content-card" id="ai-analysis-section">
+            <h2 class="section-title">
+                <span class="section-icon">3</span>
+                AI Analysis
+            </h2>
+            
+            <div class="s3-integration-note">
+                <h5>Intelligent Log Analysis with Bedrock</h5>
+                <p>
+                    Run AI analysis after your pipeline completes to get intelligent insights from your actual execution logs stored in S3. 
+                    Bedrock Nova Pro will analyze all pipeline stages and provide actionable recommendations for improvement.
+                </p>
+            </div>
+            
+            <div id="ai-analysis-results" class="hidden">
+                <div style="background: #f8fafc; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                    <h4 style="color: #1e40af; margin-bottom: 16px;">AI Analysis Results</h4>
+                    <div id="analysis-content">
+                        <!-- Analysis content will be populated here -->
+                    </div>
+                    
+                    <div style="margin-top: 24px;">
+                        <button class="btn btn-warning" id="download-report-btn">
+                            Download PDF Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-actions">
+                <button class="btn btn-secondary" id="analyze-ai-btn" disabled>
+                    Run AI Analysis
+                </button>
+                <small style="display: block; margin-top: 12px; color: #64748b;">
+                    Analyze pipeline logs from S3 for professional improvement suggestions
+                </small>
+            </div>
+
+            <div id="ai-status" class="status hidden"></div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
